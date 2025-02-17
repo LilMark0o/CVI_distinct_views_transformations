@@ -1,4 +1,6 @@
 #include <random>
+#include <cstring> // Include for strcmp
+#include <string>
 #include "Tutorial04_Instancing.hpp"
 #include "MapHelper.hpp"
 #include "GraphicsUtilities.h"
@@ -164,19 +166,52 @@ void Tutorial04_Instancing::Render()
     DrawAttrs.Flags        = DRAW_FLAG_VERIFY_ALL;
     m_pImmediateContext->DrawIndexed(DrawAttrs);
 }
+std::string selectedText = "";
+static int selected_gui = 0;
+void Tutorial04_Instancing::UpdateUI()
+{
+    ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
+    if (ImGui::Begin("Settings", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        static const char* items[] = { "New", "Top", "Front", "Normal" };
+        static int selectedItem = 0; // Index of the selected item
+        static const char* selectedText = items[selectedItem]; // Store selected text
+
+        if (ImGui::Combo("Grid Size", &selectedItem, items, IM_ARRAYSIZE(items)))
+        {
+            selectedText = items[selectedItem]; // Update the selected text variable
+            selected_gui = selectedItem;
+        }
+
+        // Example usage of selectedText
+        ImGui::Text("Selected: %s", selectedText);
+    }
+    ImGui::End();
+}
 
 void Tutorial04_Instancing::Update(double CurrTime, double ElapsedTime)
 {
-    SampleBase::Update(CurrTime, ElapsedTime);
 
     // Set up a top-down view
-    
-    //float4x4 View = float4x4::RotationX(-0.4f) * float4x4::Translation(0.f, 0.f, 30.0f);
-    //float4x4 View = float4x4::RotationX(-PI_F / 2) * float4x4::Translation(0.f, 0.0f, 30.0f);
-    //float4x4 View = float4x4::RotationY(-PI_F / 2)  * float4x4::Translation(0.f, -5.0f, 30.0f);
-    //float4x4 View = float4x4::Translation(0.f, 0.f, 30.0f);
-    float4x4 View = float4x4::RotationX(-PI_F / 6) * float4x4::RotationY(-PI_F / 4) * float4x4::Translation(0.0f, -2.0f, 30.0f);
+    float4x4 View;
 
+    if (selected_gui == 3)
+    {
+        View = float4x4::RotationX(-0.4f) * float4x4::Translation(0.f, -2.f, 30.0f);
+    }
+    else if (selected_gui == 1)
+    {
+        View = float4x4::RotationX(-PI_F / 2) * float4x4::Translation(0.f, 0.0f, 30.0f);
+    }
+    else if (selected_gui == 2)
+    {
+        View = float4x4::RotationY(-PI_F / 2) * float4x4::Translation(0.f, -5.0f, 30.0f);
+    }
+    else {
+        View = float4x4::RotationX(-PI_F / 6) * float4x4::RotationY(-PI_F / 4) * float4x4::Translation(0.0f, -2.0f, 30.0f);
+    }
+    SampleBase::Update(CurrTime, ElapsedTime);
+    UpdateUI();
 
     
     auto SrfPreTransform = GetSurfacePretransformMatrix(float3{0, 0, 1});

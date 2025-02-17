@@ -19,6 +19,7 @@ private:
     void CreatePipelineState();
     void CreateInstanceBuffer();
     void PopulateInstanceBuffer();
+    void UpdateUI();  // Ensure this function is declared
 
     // Recursos para los cubos
     RefCntAutoPtr<IPipelineState>         m_pPSO;
